@@ -9,6 +9,9 @@
 
 extern "C" {
 
+#ifdef memcpy
+#  undef memcpy
+#endif
 void *memcpy(void *__restrict dest, const void *__restrict src, std::size_t n) {
     std::uint8_t *pdest = static_cast<std::uint8_t *>(dest);
     const std::uint8_t *psrc = static_cast<const std::uint8_t *>(src);
@@ -20,6 +23,9 @@ void *memcpy(void *__restrict dest, const void *__restrict src, std::size_t n) {
     return dest;
 }
 
+#ifdef memset
+#  undef memset
+#endif
 void *memset(void *s, int c, std::size_t n) {
     std::uint8_t *p = static_cast<std::uint8_t *>(s);
 
@@ -30,6 +36,9 @@ void *memset(void *s, int c, std::size_t n) {
     return s;
 }
 
+#ifdef memmove
+#  undef memmove
+#endif
 void *memmove(void *dest, const void *src, std::size_t n) {
     std::uint8_t *pdest = static_cast<std::uint8_t *>(dest);
     const std::uint8_t *psrc = static_cast<const std::uint8_t *>(src);
@@ -47,6 +56,9 @@ void *memmove(void *dest, const void *src, std::size_t n) {
     return dest;
 }
 
+#ifdef memcmp
+#  undef memcmp
+#endif
 int memcmp(const void *s1, const void *s2, std::size_t n) {
     const std::uint8_t *p1 = static_cast<const std::uint8_t *>(s1);
     const std::uint8_t *p2 = static_cast<const std::uint8_t *>(s2);
