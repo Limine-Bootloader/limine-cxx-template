@@ -229,8 +229,7 @@ ifeq ($(ARCH),riscv64)
     override SHARED_FLAGS += \
         -mabi=lp64
     override LDFLAGS += \
-        -Wl,-m,elf64lriscv \
-        -Wl,--no-relax
+        -Wl,-m,elf64lriscv
 endif
 ifeq ($(ARCH),loongarch64)
     # -msoft-float, unlike -mfpu=none, also overrides a -mdouble-float or
@@ -240,8 +239,7 @@ ifeq ($(ARCH),loongarch64)
         -march=loongarch64 \
         -msoft-float
     override LDFLAGS += \
-        -Wl,-m,elf64loongarch \
-        -Wl,--no-relax
+        -Wl,-m,elf64loongarch
 endif
 
 # Add the shared flags to the C and C++ flags, now that they are complete.
@@ -313,6 +311,20 @@ ifneq ($(CXX_LINK_ERROR),)
     $(call TOOLCHAIN_ERROR,The linker does not work with the given LDFLAGS: $(CXX_LINK_ERROR))
 endif
 
+# Some drivers ignore -fuse-ld on some targets, so check that the banner
+# of the linker that runs names the one asked for, in any case.
+override CXX_FUSE_LD := $(lastword $(filter -fuse-ld=%,$(CXXFLAGS) $(LDFLAGS)))
+ifneq ($(CXX_FUSE_LD),)
+    override CXX_FUSE_LD_NAME := $(firstword $(subst -, ,$(patsubst ld.%,%,$(notdir $(patsubst -fuse-ld=%,%,$(CXX_FUSE_LD))))))
+    # GNU ld calls itself ld, not bfd.
+    override CXX_LD_BANNER_NAME := $(patsubst bfd,ld,$(CXX_FUSE_LD_NAME))
+    override CXX_LD_VERSION := $(shell LC_ALL=C $(CXX) $(CXXFLAGS) $(LDFLAGS) -Wl,--version 2>/dev/null | head -n 1)
+    override CXX_RUNS_FUSE_LD := $(shell ! printf '%s\n' '$(subst ',,$(CXX_LD_VERSION))' | grep -qiE '(^|[^[:alnum:]])$(CXX_LD_BANNER_NAME)([^[:alnum:]]|$$)'; echo $$?)
+    ifneq ($(CXX_RUNS_FUSE_LD),1)
+        $(call TOOLCHAIN_ERROR,The C++ compiler ignores $(CXX_FUSE_LD) and runs another linker: $(CXX_LD_VERSION))
+    endif
+endif
+
 override CFLAGS += $(call CC_FLAG,-fno-stack-clash-protection)
 override CXXFLAGS += $(call CXX_FLAG,-fno-stack-clash-protection)
 
@@ -369,8 +381,6 @@ ifeq ($(ARCH),riscv64)
         ifeq ($(call CC_HAS_COMPILE_FLAG,-mcmodel=small,-mcode-model),1)
             override CFLAGS += \
                 -mcmodel=small
-        else
-            $(call TOOLCHAIN_ERROR,The C compiler has no name for the low code model)
         endif
     endif
     ifeq ($(call CXX_HAS_COMPILE_FLAG,-mcmodel=medlow,-mcode-model),1)
@@ -380,12 +390,14 @@ ifeq ($(ARCH),riscv64)
         ifeq ($(call CXX_HAS_COMPILE_FLAG,-mcmodel=small,-mcode-model),1)
             override CXXFLAGS += \
                 -mcmodel=small
-        else
-            $(call TOOLCHAIN_ERROR,The C++ compiler has no name for the low code model)
         endif
     endif
-    override CFLAGS += $(call CC_FLAG,-mno-relax)
-    override CXXFLAGS += $(call CXX_FLAG,-mno-relax)
+    # Keep linker relaxation away from gp, which nothing sets up. Linkers
+    # without the flag only use gp if the script defines __global_pointer$.
+    ifeq ($(call LD_HAS_FLAG,--no-relax-gp),1)
+        override LDFLAGS += \
+            -Wl,--no-relax-gp
+    endif
 endif
 ifeq ($(ARCH),loongarch64)
     # Clang 16 takes the soft float flags but still records the double
@@ -413,6 +425,8 @@ ifeq ($(ARCH),loongarch64)
         ifeq ($(call CC_HAS_COMPILE_FLAG,-mdirect-extern-access),1)
             override CFLAGS += \
                 -mdirect-extern-access
+        else
+            $(call TOOLCHAIN_ERROR,The C compiler cannot keep external data out of the GOT)
         endif
     endif
     ifeq ($(CXX_IS_CLANG),1)
@@ -422,6 +436,8 @@ ifeq ($(ARCH),loongarch64)
         ifeq ($(call CXX_HAS_COMPILE_FLAG,-mdirect-extern-access),1)
             override CXXFLAGS += \
                 -mdirect-extern-access
+        else
+            $(call TOOLCHAIN_ERROR,The C++ compiler cannot keep external data out of the GOT)
         endif
     endif
     # Clang called this code model "small" before the ISA's own name.
@@ -432,8 +448,6 @@ ifeq ($(ARCH),loongarch64)
         ifeq ($(call CC_HAS_COMPILE_FLAG,-mcmodel=small,-mcode-model),1)
             override CFLAGS += \
                 -mcmodel=small
-        else
-            $(call TOOLCHAIN_ERROR,The C compiler has no name for the normal code model)
         endif
     endif
     ifeq ($(call CXX_HAS_COMPILE_FLAG,-mcmodel=normal,-mcode-model),1)
@@ -443,12 +457,8 @@ ifeq ($(ARCH),loongarch64)
         ifeq ($(call CXX_HAS_COMPILE_FLAG,-mcmodel=small,-mcode-model),1)
             override CXXFLAGS += \
                 -mcmodel=small
-        else
-            $(call TOOLCHAIN_ERROR,The C++ compiler has no name for the normal code model)
         endif
     endif
-    override CFLAGS += $(call CC_FLAG,-mno-relax)
-    override CXXFLAGS += $(call CXX_FLAG,-mno-relax)
     # Some Clangs do not record the LoongArch ABI in LTO objects, so pass
     # it to LTO if the IR of an empty file does not record it.
     override CC_LTO_HAS_ABI := $(if $(filter 11,$(CC_IS_CLANG)$(CFLAGS_HAS_LTO)),$(shell ! $(CC) $(CFLAGS) -S -emit-llvm -x c /dev/null -o - 2>/dev/null | grep -q target-abi; echo $$?),1)
