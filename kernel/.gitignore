@@ -3,7 +3,7 @@
 /.deps-obtained
 /freestanding-c-hdrs
 /freestanding-cxx-hdrs
-/cc-runtime
+/freestanding-lgrt
 /limine-protocol
 /bin-*
 /obj-*

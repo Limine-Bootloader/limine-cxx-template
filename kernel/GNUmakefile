@@ -348,8 +348,6 @@ ifeq ($(ARCH),x86_64)
     override CXXFLAGS += $(call CXX_FLAG,-mno-80387)
 endif
 ifeq ($(ARCH),aarch64)
-    override CFLAGS += $(call CC_FLAG,-mno-outline-atomics)
-    override CXXFLAGS += $(call CXX_FLAG,-mno-outline-atomics)
     override CFLAGS += $(call CC_FLAG,-mbranch-protection=none)
     override CXXFLAGS += $(call CXX_FLAG,-mbranch-protection=none)
     # Only the linker can work around Cortex-A53 erratum 843419, so
@@ -496,7 +494,7 @@ endif
 # Use "find" to glob all *.c, *.cpp, *.S, and *.asm files in the tree
 # (except the src/arch/* directories, as those are gonna be added
 # in the next step).
-override SRCFILES := $(shell find -L src cc-runtime/src -type f ! -path 'src/arch/*' 2>/dev/null | LC_ALL=C sort)
+override SRCFILES := $(shell find -L src freestanding-lgrt/src -type f ! -path 'src/arch/*' 2>/dev/null | LC_ALL=C sort)
 # Add architecture specific files, if they exist.
 override SRCFILES += $(shell find -L src/arch/$(ARCH) -type f 2>/dev/null | LC_ALL=C sort)
 # Obtain the object and header dependencies file names.
@@ -546,7 +544,7 @@ bin-$(ARCH)/$(OUTPUT): GNUmakefile obj-$(ARCH)/CXX obj-$(ARCH)/CXXFLAGS obj-$(AR
 # The compilers may emit calls to the memory functions and the compiler
 # runtime that LTO does not account for, so never build those with LTO.
 obj-$(ARCH)/src/memory.cpp.o: override CXXFLAGS += -fno-lto
-obj-$(ARCH)/cc-runtime/src/cc-runtime.c.o: override CFLAGS += -fno-lto
+obj-$(ARCH)/freestanding-lgrt/src/freestanding-lgrt.c.o: override CFLAGS += -fno-lto
 
 # Compilation rules for *.c files.
 obj-$(ARCH)/%.c.o: %.c GNUmakefile obj-$(ARCH)/CC obj-$(ARCH)/CFLAGS obj-$(ARCH)/CPPFLAGS
@@ -578,7 +576,7 @@ clean:
 # Remove everything built and generated including downloaded dependencies.
 .PHONY: distclean
 distclean:
-	rm -rf bin-* obj-* .deps-obtained .cache compile_commands.json freestanding-c-hdrs freestanding-cxx-hdrs cc-runtime limine-protocol
+	rm -rf bin-* obj-* .deps-obtained .cache compile_commands.json freestanding-c-hdrs freestanding-cxx-hdrs freestanding-lgrt limine-protocol
 
 # Install the final built executable to its final on-root location. Not
 # install(1), which takes other arguments on illumos and Solaris.
