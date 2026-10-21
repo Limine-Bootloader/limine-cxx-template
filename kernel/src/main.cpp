@@ -125,8 +125,8 @@ extern "C" void kmain() {
     }
 
     // Call global constructors.
-    for (std::size_t i = 0; &__init_array_start[i] != __init_array_end; i++) {
-        __init_array_start[i]();
+    for (void (**ctor)() = __init_array_start; ctor < __init_array_end;) {
+        (*ctor++)();
     }
     for (void (**ctor)() = __ctors_end; ctor > __ctors_start;) {
         (*--ctor)();
