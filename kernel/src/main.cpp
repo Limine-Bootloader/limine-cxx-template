@@ -67,6 +67,10 @@ extern "C" {
 extern void (*__init_array_start[])();
 extern void (*__init_array_end[])();
 
+// The same for .ctors, which Clang 10 and older emit for x86 and which runs backwards.
+extern void (*__ctors_start[])();
+extern void (*__ctors_end[])();
+
 // Halt and catch fire function.
 namespace {
 
@@ -123,6 +127,9 @@ extern "C" void kmain() {
     // Call global constructors.
     for (std::size_t i = 0; &__init_array_start[i] != __init_array_end; i++) {
         __init_array_start[i]();
+    }
+    for (void (**ctor)() = __ctors_end; ctor > __ctors_start;) {
+        (*--ctor)();
     }
 
     // Ensure we got a framebuffer.
