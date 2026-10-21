@@ -58,9 +58,16 @@ SECTIONS
     /* C++ is a language that allows for global constructors. In order to obtain the */
     /* address of the ".init_array" section we need to define a symbol for it. */
     /* The section is writable, so it needs to be mapped to :data. */
+    /* GNU ld before 2.22 and gold before 2.27 cannot sort constructors by priority, */
+    /* so we sort them by name a width at a time, as Clang does not pad priorities. */
     .init_array : {
         __init_array = .;
-        KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*)))
+        KEEP(*(SORT(.init_array.?)))
+        KEEP(*(SORT(.init_array.??)))
+        KEEP(*(SORT(.init_array.???)))
+        KEEP(*(SORT(.init_array.????)))
+        KEEP(*(SORT(.init_array.?????)))
+        KEEP(*(.init_array.*))
         KEEP(*(.init_array))
         __init_array_end = .;
     } :data
