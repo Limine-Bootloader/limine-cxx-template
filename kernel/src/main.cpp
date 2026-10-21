@@ -64,7 +64,7 @@ extern "C" {
 }
 
 // Extern declarations for global constructors array.
-extern void (*__init_array[])();
+extern void (*__init_array_start[])();
 extern void (*__init_array_end[])();
 
 // Halt and catch fire function.
@@ -121,8 +121,8 @@ extern "C" void kmain() {
     }
 
     // Call global constructors.
-    for (std::size_t i = 0; &__init_array[i] != __init_array_end; i++) {
-        __init_array[i]();
+    for (std::size_t i = 0; &__init_array_start[i] != __init_array_end; i++) {
+        __init_array_start[i]();
     }
 
     // Ensure we got a framebuffer.

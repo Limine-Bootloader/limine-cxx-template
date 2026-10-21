@@ -61,7 +61,7 @@ SECTIONS
     /* GNU ld before 2.22 and gold before 2.27 cannot sort constructors by priority, */
     /* so we sort them by name a width at a time, as Clang does not pad priorities. */
     .init_array : {
-        __init_array = .;
+        __init_array_start = .;
         KEEP(*(SORT(.init_array.?)))
         KEEP(*(SORT(.init_array.??)))
         KEEP(*(SORT(.init_array.???)))
