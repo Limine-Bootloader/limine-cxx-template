@@ -157,7 +157,7 @@ override CPPFLAGS_C := \
     -I limine-protocol/include \
     -isystem freestanding-c-hdrs/include \
     $(CPPFLAGS) \
-    -MMD \
+    -MD \
     -MP
 
 # Internal C++ only preprocessor flags.
