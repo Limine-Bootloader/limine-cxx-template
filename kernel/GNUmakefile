@@ -155,7 +155,7 @@ override CPPFLAGS_C := \
     -nostdinc \
     -I src \
     -I limine-protocol/include \
-    -isystem freestanding-c-hdrs/$(ARCH)/include \
+    -isystem freestanding-c-hdrs/include \
     $(CPPFLAGS) \
     -MMD \
     -MP
@@ -163,7 +163,7 @@ override CPPFLAGS_C := \
 # Internal C++ only preprocessor flags.
 override CPPFLAGS_CXX := \
     $(CPPFLAGS_C) \
-    -isystem freestanding-cxx-hdrs/$(ARCH)/include
+    -isystem freestanding-cxx-hdrs/include
 
 ifeq ($(ARCH),x86_64)
     # Internal nasm flags that should not be changed by the user.

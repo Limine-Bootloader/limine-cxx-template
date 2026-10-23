@@ -42,19 +42,19 @@ clone_repo_commit() {
 rm -f .deps-obtained
 
 clone_repo_commit \
-    https://github.com/osdev0/freestanding-c-hdrs-gnu.git \
+    https://github.com/osdev0/freestanding-c-hdrs.git \
     freestanding-c-hdrs \
-    cdd9b3cc11808d3259c082a77c33dfeb0f040adc
+    29e66e09aba15375d03937c43b7ba4359f19304d
 
 clone_repo_commit \
-    https://github.com/osdev0/freestanding-cxx-hdrs-gnu.git \
+    https://github.com/osdev0/freestanding-cxx-hdrs.git \
     freestanding-cxx-hdrs \
-    6fc33d66b123874631cf27bc9ab80a9ab3a43dd5
+    6ea6c23a2b65ca4302d9b5992d23a508b6f71911
 
 clone_repo_commit \
     https://github.com/osdev0/freestanding-lgrt.git \
     freestanding-lgrt \
-    a6e79759589f9905ec08c5fdc7f10f34f668d145
+    b2a44eb59d9f7e501659a96e1e9b03a4665a939e
 
 clone_repo_commit \
     https://github.com/Limine-Bootloader/limine-protocol.git \
