@@ -1,16 +1,16 @@
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <memory.hpp>
 
-// GCC and Clang reserve the right to generate calls to the following
-// 4 C-linkage functions even if they are not directly called.
-// They must be implemented as the C specification mandates.
-// DO NOT remove or rename these functions, or stuff will eventually break!
+// GCC and Clang reserve the right to generate calls to the following 4
+// C-linkage functions even if they are not directly called. They must be
+// implemented as the C specification mandates. DO NOT remove or rename these
+// functions, or stuff will eventually break.
 
 extern "C" {
 
 #ifdef memcpy
-#  undef memcpy
+#   undef memcpy
 #endif
 void *memcpy(void *__restrict dest, const void *__restrict src, std::size_t n) {
     std::uint8_t *pdest = static_cast<std::uint8_t *>(dest);
@@ -24,7 +24,7 @@ void *memcpy(void *__restrict dest, const void *__restrict src, std::size_t n) {
 }
 
 #ifdef memset
-#  undef memset
+#   undef memset
 #endif
 void *memset(void *s, int c, std::size_t n) {
     std::uint8_t *p = static_cast<std::uint8_t *>(s);
@@ -37,7 +37,7 @@ void *memset(void *s, int c, std::size_t n) {
 }
 
 #ifdef memmove
-#  undef memmove
+#   undef memmove
 #endif
 void *memmove(void *dest, const void *src, std::size_t n) {
     std::uint8_t *pdest = static_cast<std::uint8_t *>(dest);
@@ -48,8 +48,8 @@ void *memmove(void *dest, const void *src, std::size_t n) {
             pdest[i] = psrc[i];
         }
     } else if (reinterpret_cast<std::uintptr_t>(src) < reinterpret_cast<std::uintptr_t>(dest)) {
-        for (std::size_t i = n; i > 0; i--) {
-            pdest[i-1] = psrc[i-1];
+        for (std::size_t i = n; i-- > 0; ) {
+            pdest[i] = psrc[i];
         }
     }
 
@@ -57,7 +57,7 @@ void *memmove(void *dest, const void *src, std::size_t n) {
 }
 
 #ifdef memcmp
-#  undef memcmp
+#   undef memcmp
 #endif
 int memcmp(const void *s1, const void *s2, std::size_t n) {
     const std::uint8_t *p1 = static_cast<const std::uint8_t *>(s1);

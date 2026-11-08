@@ -1,7 +1,6 @@
 #ifndef MEMORY_HPP
 #define MEMORY_HPP
 
-#include <cstdint>
 #include <cstddef>
 
 extern "C" {
