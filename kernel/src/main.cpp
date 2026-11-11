@@ -42,10 +42,20 @@ volatile std::uint64_t limine_requests_end_marker[] = LIMINE_REQUESTS_END_MARKER
 
 }
 
-// Halt and catch fire function, defined below.
+// Halt and catch fire function.
 namespace {
 
-void hcf();
+[[noreturn]] void hcf() {
+    for (;;) {
+#if defined(__x86_64__)
+        asm ("hlt");
+#elif defined(__aarch64__) || defined(__riscv)
+        asm ("wfi");
+#elif defined(__loongarch64)
+        asm ("idle 0");
+#endif
+    }
+}
 
 }
 
@@ -91,18 +101,6 @@ extern void (*__ctors_end[])();
 
 // Halt and catch fire function.
 namespace {
-
-void hcf() {
-    for (;;) {
-#if defined(__x86_64__)
-        asm ("hlt");
-#elif defined(__aarch64__) || defined(__riscv)
-        asm ("wfi");
-#elif defined(__loongarch64)
-        asm ("idle 0");
-#endif
-    }
-}
 
 // Scale an 8-bit colour channel value to the size the framebuffer gives the
 // channel and move it into place within a pixel.
