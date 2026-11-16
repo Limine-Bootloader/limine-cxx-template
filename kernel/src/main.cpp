@@ -2,24 +2,22 @@
 #include <cstdint>
 #include <limine.h>
 
+namespace {
+
 // Set the base revision to 6, this is recommended as this is the latest base
 // revision described by the Limine boot protocol specification. See
 // specification for further info.
-
-namespace {
-
 __attribute__((used, section(".limine_requests")))
 volatile std::uint64_t limine_base_revision[] = LIMINE_BASE_REVISION(6);
 
 }
 
+namespace {
+
 // The Limine requests can be placed anywhere, but it is important that the
 // compiler does not optimise them away, so, usually, they should be made
 // volatile or equivalent, _and_ they should be accessed at least once or
 // marked as used with the "used" attribute as done here.
-
-namespace {
-
 __attribute__((used, section(".limine_requests")))
 volatile limine_framebuffer_request framebuffer_request = {
     .id = LIMINE_FRAMEBUFFER_REQUEST_ID,
@@ -42,17 +40,17 @@ volatile std::uint64_t limine_requests_end_marker[] = LIMINE_REQUESTS_END_MARKER
 
 }
 
-// Halt and catch fire function.
 namespace {
 
+// Halt and catch fire function.
 [[noreturn]] void hcf() {
     for (;;) {
 #if defined(__x86_64__)
-        asm ("hlt");
+        asm volatile ("hlt" ::: "memory");
 #elif defined(__aarch64__) || defined(__riscv)
-        asm ("wfi");
+        asm volatile ("wfi" ::: "memory");
 #elif defined(__loongarch64)
-        asm ("idle 0");
+        asm volatile ("idle 0" ::: "memory");
 #endif
     }
 }
@@ -99,7 +97,6 @@ extern void (*__init_array_end[])();
 extern void (*__ctors_start[])();
 extern void (*__ctors_end[])();
 
-// Halt and catch fire function.
 namespace {
 
 // Scale an 8-bit colour channel value to the size the framebuffer gives the
