@@ -109,7 +109,10 @@ std::uint32_t fb_channel(std::uint8_t value, std::uint8_t mask_size, std::uint8_
 // Build a pixel from 8-bit red, green, and blue values following the channel
 // layout of the framebuffer.
 std::uint32_t fb_pixel(
-    limine_framebuffer *fb, std::uint8_t red, std::uint8_t green, std::uint8_t blue
+    limine_framebuffer *fb,
+    std::uint8_t red,
+    std::uint8_t green,
+    std::uint8_t blue
 ) {
     return fb_channel(red, fb->red_mask_size, fb->red_mask_shift)
          | fb_channel(green, fb->green_mask_size, fb->green_mask_shift)
